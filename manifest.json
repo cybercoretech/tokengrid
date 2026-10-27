@@ -1,10 +1,20 @@
 {
   "schemaVersion": 1,
-  "id": "cybercore.tokengrid",
+  "id": "io.github.cybercoretech.tokengrid",
   "name": "TokenGrid",
   "version": "0.1.0",
-  "kinds": ["bar-widget"],
+  "author": "cybercore",
+  "kinds": [
+    "bar-widget"
+  ],
   "entryPoints": {
     "barWidget": "BarWidget.qml"
+  },
+  "barWidget": {
+    "displayName": "TokenGrid",
+    "description": "TUI-based monitor for AI agents with live telemetry",
+    "category": "Developer Tools",
+    "allowMultiple": false,
+    "defaultSection": "right"
   }
 }
