@@ -1,0 +1,10 @@
+[package]
+name = "tokengrid-tui"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+ratatui = "0.26"
+crossterm = "0.27"
+rusqlite = { version = "0.31", features = ["bundled"] }
+chrono = "0.4"

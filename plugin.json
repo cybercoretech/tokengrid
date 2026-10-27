@@ -1,0 +1,11 @@
+{
+  "id": "tokengrid",
+  "name": "TokenGrid",
+  "version": "0.1.0",
+  "description": "TUI-based monitor for 17+ CLI AI agents with live token telemetry and budget tracking",
+  "barWidget": {
+    "icon": "grid",
+    "section": "right",
+    "onClick": "/home/raven/Devspace/Cybercore/ai/omarchy-plugins/tokengrid/bin/tokengrid-tui"
+  }
+}
