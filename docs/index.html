@@ -85,11 +85,12 @@
     </section>
 
     <section class="wrap section" id="pipeline">
-      <div class="section-head reveal"><div><p class="eyebrow">01 / Pipeline</p><h2>One run,<br><em>one record.</em></h2></div><p>No proxy, no cloud, no API key. Your alias runs the agent, the wrapper times it, the daemon writes the row, and both surfaces read the same file. Five hops, all local.</p></div>
+      <div class="section-head reveal"><div><p class="eyebrow">01 / Pipeline</p><h2>One run,<br><em>one record.</em></h2></div><p>No proxy, no cloud, no API key. Your alias runs the agent, the wrapper times it, the daemon writes the row, and both surfaces read the same file. Six hops, all local.</p></div>
       <div class="pipeline reveal">
         <div class="step"><h3>ALIAS</h3><p><code>config/tokengrid_aliases.zsh</code> wraps all 19 agent commands in your shell.</p></div>
         <div class="step"><h3>WRAPPER</h3><p><code>bin/agent_wrapper.sh</code> executes the agent, times it, and writes an estimated baseline row.</p></div>
         <div class="step"><h3>DAEMON</h3><p><code>bin/tokengrid_daemon.py</code> logs agent, model, tokens and cost with a provenance tag.</p></div>
+        <div class="step"><h3>HARVEST</h3><p>On every TUI open the hub syncs opencode's own session ledger — <code>~/.local/share/opencode/opencode.db</code>, read-only — into exact <code>measured</code> rows, deduped by a per-session cursor so no token is counted twice.</p></div>
         <div class="step"><h3>LEDGER</h3><p><code>~/.local/share/omarchy/tokengrid/tokengrid.db</code> — SQLite <code>token_usage</code> (<code>measurement_type</code>) + <code>agents</code>; kept outside the plugin dir so the shell's bar hot-reload never fires on writes, and the old plugin-dir database is adopted on first run; overridable via <code>TOKENGRID_DB_PATH</code>.</p></div>
         <div class="step"><h3>SURFACE</h3><p>Bar payload and Rust TUI render the same rows, instantly.</p></div>
       </div>

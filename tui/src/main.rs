@@ -3,7 +3,7 @@ use std::io;
 use std::path::PathBuf;
 use std::time::Duration;
 
-use chrono::Local;
+use chrono::{Local, TimeZone};
 use crossterm::{
     event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode},
     execute,
@@ -16,7 +16,7 @@ use ratatui::{
     widgets::{Block, Borders, Cell, Clear, Paragraph, Row, Table},
     Frame, Terminal,
 };
-use rusqlite::Connection;
+use rusqlite::{Connection, OpenFlags};
 
 #[derive(Clone)]
 struct AgentRow {
@@ -81,38 +81,7 @@ impl App {
         let db_path = get_db_path();
         let conn = Connection::open(&db_path)?;
 
-        conn.execute(
-            "CREATE TABLE IF NOT EXISTS token_usage (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-                agent_name TEXT NOT NULL,
-                model_name TEXT,
-                prompt_tokens INTEGER DEFAULT 0,
-                completion_tokens INTEGER DEFAULT 0,
-                cost_est REAL DEFAULT 0.0,
-                measurement_type TEXT NOT NULL DEFAULT 'unknown'
-            )",
-            [],
-        )?;
-
-        let has_measurement_type: bool = {
-            let mut columns = conn.prepare("PRAGMA table_info(token_usage)")?;
-            let rows = columns.query_map([], |row| row.get::<_, String>(1))?;
-            let mut found = false;
-            for column in rows {
-                if column? == "measurement_type" {
-                    found = true;
-                    break;
-                }
-            }
-            found
-        };
-        if !has_measurement_type {
-            conn.execute(
-                "ALTER TABLE token_usage ADD COLUMN measurement_type TEXT NOT NULL DEFAULT 'unknown'",
-                [],
-            )?;
-        }
+        ensure_ledger_schema(&conn)?;
 
         conn.execute(
             "CREATE TABLE IF NOT EXISTS agents (
@@ -372,6 +341,204 @@ fn get_db_path() -> PathBuf {
     path
 }
 
+/// Create/upgrade the ledger schema. Shared by the render path and the
+/// opencode harvest so both can safely write rows.
+fn ensure_ledger_schema(conn: &Connection) -> Result<(), Box<dyn Error>> {
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS token_usage (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+            agent_name TEXT NOT NULL,
+            model_name TEXT,
+            prompt_tokens INTEGER DEFAULT 0,
+            completion_tokens INTEGER DEFAULT 0,
+            cost_est REAL DEFAULT 0.0,
+            measurement_type TEXT NOT NULL DEFAULT 'unknown'
+        )",
+        [],
+    )?;
+
+    let has_measurement_type: bool = {
+        let mut columns = conn.prepare("PRAGMA table_info(token_usage)")?;
+        let rows = columns.query_map([], |row| row.get::<_, String>(1))?;
+        let mut found = false;
+        for column in rows {
+            if column? == "measurement_type" {
+                found = true;
+                break;
+            }
+        }
+        found
+    };
+    if !has_measurement_type {
+        conn.execute(
+            "ALTER TABLE token_usage ADD COLUMN measurement_type TEXT NOT NULL DEFAULT 'unknown'",
+            [],
+        )?;
+    }
+    Ok(())
+}
+
+/// Extract the model id from opencode's JSON model column:
+/// `{"id":"mimo-v2.6-flash-free","providerID":"opencode"}` → `mimo-v2.6-flash-free`.
+fn opencode_model_id(raw: &str) -> String {
+    if let Some(pos) = raw.find("\"id\"") {
+        let after = raw[pos + 4..].trim_start_matches(':').trim_start_matches('"');
+        if let Some(end) = after.find('"') {
+            if !after[..end].is_empty() {
+                return after[..end].to_string();
+            }
+        }
+    }
+    "default".to_string()
+}
+
+/// Harvest opencode's own session ledger into `token_usage` as `measured`
+/// rows. opencode records exact per-session token totals in
+/// `~/.local/share/opencode/opencode.db`; a cursor table stores the last
+/// synced totals per session so every token is counted exactly once:
+/// sessions created today contribute their full totals on first sync,
+/// older sessions are baselined and only new tokens count afterwards.
+/// The source is opened read-only — opencode's live data is never touched.
+/// Failures are silent: the next TUI open retries.
+fn sync_opencode_usage() {
+    let home = match std::env::var_os("HOME") {
+        Some(h) => PathBuf::from(h),
+        None => return,
+    };
+    let source = home.join(".local/share/opencode/opencode.db");
+    if !source.exists() {
+        return;
+    }
+    let src = match Connection::open_with_flags(&source, OpenFlags::SQLITE_OPEN_READ_ONLY) {
+        Ok(conn) => conn,
+        Err(_) => return, // opencode mid-write or locked — retried on next open
+    };
+    let _ = src.busy_timeout(Duration::from_millis(800));
+
+    let sessions: Vec<(String, i64, i64, i64, i64, f64, String)> = {
+        let mut stmt = match src.prepare(
+            "SELECT id, time_created, tokens_input, tokens_output, \
+                    tokens_reasoning, COALESCE(cost, 0), COALESCE(model, '') \
+             FROM session_v2",
+        ) {
+            Ok(stmt) => stmt,
+            Err(_) => return, // schema mismatch — older opencode, no ledger
+        };
+        let rows = match stmt.query_map(
+            [],
+            |row: &rusqlite::Row<'_>|
+             -> rusqlite::Result<(String, i64, i64, i64, i64, f64, String)> {
+                Ok((
+                    row.get(0)?,
+                    row.get(1)?,
+                    row.get(2)?,
+                    row.get(3)?,
+                    row.get(4)?,
+                    row.get(5)?,
+                    row.get(6)?,
+                ))
+            },
+        ) {
+            Ok(rows) => rows,
+            Err(_) => return,
+        };
+        let mut out = Vec::new();
+        for row in rows {
+            match row {
+                Ok(v) => out.push(v),
+                Err(_) => return,
+            }
+        }
+        out
+    };
+    if sessions.is_empty() {
+        return;
+    }
+
+    // Local midnight — sessions born after it belong to "today".
+    let now = Local::now();
+    let today_start_ms = now
+        .date_naive()
+        .and_hms_opt(0, 0, 0)
+        .and_then(|naive| Local.from_local_datetime(&naive).single())
+        .map(|dt| dt.timestamp_millis())
+        .unwrap_or(0);
+
+    let mut ledger = match Connection::open(get_db_path()) {
+        Ok(conn) => conn,
+        Err(_) => return,
+    };
+    let _ = ledger.busy_timeout(Duration::from_millis(800));
+    if ensure_ledger_schema(&ledger).is_err() {
+        return;
+    }
+    if ledger
+        .execute(
+            "CREATE TABLE IF NOT EXISTS opencode_cursor (
+                session_id TEXT PRIMARY KEY,
+                tokens_input INTEGER NOT NULL,
+                tokens_output INTEGER NOT NULL,
+                tokens_reasoning INTEGER NOT NULL,
+                cost REAL NOT NULL DEFAULT 0
+            )",
+            [],
+        )
+        .is_err()
+    {
+        return;
+    }
+
+    let tx = match ledger.transaction() {
+        Ok(tx) => tx,
+        Err(_) => return,
+    };
+    for (sid, time_created, t_in, t_out, t_reason, cost, model_raw) in &sessions {
+        let cursor: Option<(i64, i64, i64, f64)> = tx
+            .query_row(
+                "SELECT tokens_input, tokens_output, tokens_reasoning, cost \
+                 FROM opencode_cursor WHERE session_id = ?1",
+                rusqlite::params![sid],
+                |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?, row.get(3)?)),
+            )
+            .ok();
+
+        let (p_tok, c_tok, cost_delta) = match cursor {
+            None => {
+                // First sighting: sessions born today count in full; older
+                // sessions are baselined without backfilling their history.
+                if *time_created >= today_start_ms {
+                    (*t_in, *t_out + *t_reason, *cost)
+                } else {
+                    (0, 0, 0.0)
+                }
+            }
+            Some((c_in, c_out, c_reason, c_cost)) => (
+                (*t_in - c_in).max(0),
+                ((*t_out + *t_reason) - (c_out + c_reason)).max(0),
+                (*cost - c_cost).max(0.0),
+            ),
+        };
+
+        if p_tok > 0 || c_tok > 0 || cost_delta > 0.0 {
+            let _ = tx.execute(
+                "INSERT INTO token_usage (
+                    agent_name, model_name, prompt_tokens, completion_tokens,
+                    cost_est, measurement_type
+                 ) VALUES ('opencode', ?1, ?2, ?3, ?4, 'measured')",
+                rusqlite::params![opencode_model_id(model_raw), p_tok, c_tok, cost_delta],
+            );
+        }
+        let _ = tx.execute(
+            "INSERT OR REPLACE INTO opencode_cursor (
+                session_id, tokens_input, tokens_output, tokens_reasoning, cost
+             ) VALUES (?1, ?2, ?3, ?4, ?5)",
+            rusqlite::params![sid, t_in, t_out, t_reason, cost],
+        );
+    }
+    let _ = tx.commit();
+}
+
 fn delete_agent_db(id: i64) -> Result<(), Box<dyn Error>> {
     let conn = Connection::open(get_db_path())?;
     conn.execute("DELETE FROM agents WHERE id = ?1", rusqlite::params![id])?;
@@ -462,6 +629,9 @@ fn fetch_agent_details(agent_name: &str) -> Result<AgentDetailData, Box<dyn Erro
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
+    // Pull the latest measured opencode usage before the first frame.
+    sync_opencode_usage();
+
     enable_raw_mode()?;
     let mut stdout = io::stdout();
     execute!(stdout, EnterAlternateScreen, EnableMouseCapture)?;
