@@ -2,7 +2,7 @@
 hl.window_rule({
     name = "tokengrid-floating-rule",
     match = {
-        initial_title = "TokenGridTelemetry"
+        title = "TokenGrid"
     },
     float = true,
     size = "1100 650",

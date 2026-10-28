@@ -212,6 +212,14 @@ def build_claims() -> list[Claim]:
               r"import psutil",
               r"via psutil",
               "metrics sampling"),
+        Claim("aliases-selfrelative", "01 Pipeline", SRC_ALIASES,
+              r'TOKENGRID_WRAPPER="\$\{\$\{\(%\):-%x\}:A:h:h\}/bin/agent_wrapper\.sh',
+              r"bin/agent_wrapper\.sh",
+              "wrapper path is self-relative"),
+        Claim("rule-title", "04 Setup", SRC_LUA,
+              r'(?<!initial_)title = "TokenGrid"',
+              r'title = <span class="s">"TokenGrid"</span>',
+              "float rule matches ghostty title"),
     ]
     claims.extend(dynamic_claims())
     return claims
@@ -264,11 +272,11 @@ def dynamic_claims() -> list[Claim]:
 
 
 def cross_checks() -> list[str]:
-    """Consistency checks between two source files (not page copy)."""
+    """Consistency checks between source files (not page copy)."""
     errors: list[str] = []
     roster = re.search(r"INITIAL_AGENTS = \[(.*?)\]", read(SRC_DAEMON), re.S)
-    if roster:
-        agents = set(re.findall(r'"([^"]+)"', roster.group(1)))
+    agents = set(re.findall(r'"([^"]+)"', roster.group(1))) if roster else set()
+    if agents:
         wrappers = set(re.findall(r'_tokengrid_run "([^"]+)"', read(SRC_ALIASES)))
         if agents != wrappers:
             only_roster = sorted(agents - wrappers)
@@ -278,6 +286,52 @@ def cross_checks() -> list[str]:
                 f"      daemon INITIAL_AGENTS only: {only_roster or '—'}\n"
                 f"      aliases only:               {only_wrappers or '—'}\n"
                 "      → every rostered agent needs an alias and vice versa")
+
+        try:
+            desc = read("plugin.json")
+        except FileNotFoundError:
+            desc = ""
+        count = re.search(r"(\d+) CLI AI agents", desc)
+        if not count:
+            errors.append("plugin.json description lacks an agent count "
+                          f"(roster is {len(agents)})")
+        elif int(count.group(1)) != len(agents):
+            errors.append(f"plugin.json says {count.group(1)} CLI AI agents, "
+                          f"roster has {len(agents)}")
+
+    errors.extend(personal_path_check())
+    return errors
+
+
+SCAN_GLOBS = [
+    "*.md", "*.json", "*.zsh", "*.sh", "*.py", "*.rs", "*.lua", "*.qml",
+    "config/*", "helpers/*", "bin/*", "bar_module/*", "lua/*",
+    "scripts/*", "src/*", "tui/src/*", "docs/*.html", "docs/*.css",
+]
+PERSONAL_PATH = re.compile(r"/home/|Devspace")
+
+
+def personal_path_check() -> list[str]:
+    """No machine-specific paths in distributable files (site + plugin)."""
+    errors: list[str] = []
+    seen: set[Path] = set()
+    self_path = Path(__file__).resolve()
+    for pattern in SCAN_GLOBS:
+        for path in sorted(ROOT.glob(pattern)):
+            if not path.is_file() or path in seen:
+                continue
+            seen.add(path)
+            if path.name.endswith(".pre-telemetry") or path.resolve() == self_path:
+                continue  # the checker itself holds the detection pattern
+            try:
+                text = path.read_text(encoding="utf-8")
+            except (UnicodeDecodeError, OSError):
+                continue  # binary (compiled TUI, caches)
+            for lineno, line in enumerate(text.splitlines(), 1):
+                if PERSONAL_PATH.search(line):
+                    rel = path.relative_to(ROOT)
+                    errors.append(f"{rel}:{lineno} contains a personal path: "
+                                  f"{line.strip()[:80]}")
     return errors
 
 
@@ -349,9 +403,15 @@ def main() -> int:
         print(f"ok   {c.key:<22} [{c.section}] {c.note}")
         passed += 1
 
-    for err in cross_checks() + html_balance_check():
-        print(f"FAIL cross-check: {err}")
-        failed += 1
+    cross_errors = cross_checks() + html_balance_check()
+    if cross_errors:
+        for err in cross_errors:
+            print(f"FAIL cross-check: {err}")
+        failed += len(cross_errors)
+    else:
+        print("ok   cross-checks           roster↔wrappers, plugin.json count, "
+              "no personal paths, html balance")
+        passed += 1
 
     print(f"\n{passed} passed, {failed} failed")
     if failed:

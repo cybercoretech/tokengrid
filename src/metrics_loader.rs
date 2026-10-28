@@ -13,7 +13,10 @@ pub struct MetricPoint {
 }
 
 pub fn load_metric_history(view_type: &str) -> Vec<MetricPoint> {
-    let home = std::env::var("HOME").unwrap_or_else(|_| "/home/raven".to_string());
+    let home = match std::env::var("HOME") {
+        Ok(home) => home,
+        Err(_) => return Vec::new(),
+    };
     let path = PathBuf::from(home)
         .join(".local/share/omarchy/tokengrid/metrics")
         .join(format!("{}.json", view_type));

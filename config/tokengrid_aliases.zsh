@@ -1,8 +1,10 @@
 # TokenGrid Automatic Agent Routing Aliases
 # Add this line to your ~/.zshrc:
-#   source /home/raven/Devspace/Cybercore/ai/omarchy-plugins/tokengrid/config/tokengrid_aliases.zsh
+#   source ~/.config/omarchy/plugins/io.github.cybercoretech.tokengrid/config/tokengrid_aliases.zsh
 
-TOKENGRID_WRAPPER="$HOME/Devspace/Cybercore/ai/omarchy-plugins/tokengrid/bin/agent_wrapper.sh"
+# Resolve the wrapper relative to this file — works from the plugin
+# directory, a dev checkout or a symlink; no machine-specific paths.
+TOKENGRID_WRAPPER="${${(%):-%x}:A:h:h}/bin/agent_wrapper.sh"
 
 _tokengrid_run() {
     local agent_cmd="$1"
@@ -14,7 +16,7 @@ _tokengrid_run() {
     fi
 }
 
-# Define wrappers for all 17 target agents
+# Define wrappers for all 19 target agents
 gemini() { _tokengrid_run "gemini" "$@"; }
 claude() { _tokengrid_run "claude" "$@"; }
 crush() { _tokengrid_run "crush" "$@"; }
