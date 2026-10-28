@@ -4,7 +4,15 @@ import sys
 import sqlite3
 from pathlib import Path
 
-DB_PATH = Path.home() / "Devspace/Cybercore/ai/omarchy-plugins/tokengrid/data/tokengrid.db"
+DB_PATH = Path(
+    os.environ.get(
+        "TOKENGRID_DB_PATH",
+        str(
+            Path.home()
+            / ".config/omarchy/plugins/io.github.cybercoretech.tokengrid/data/tokengrid.db"
+        ),
+    )
+).expanduser()
 
 INITIAL_AGENTS = [
     "gemini", "claude", "crush", "cursor-agent", "codex", "copilot", 
@@ -26,9 +34,20 @@ def init_db():
             model_name TEXT,
             prompt_tokens INTEGER DEFAULT 0,
             completion_tokens INTEGER DEFAULT 0,
-            cost_est REAL DEFAULT 0.0
+            cost_est REAL DEFAULT 0.0,
+            measurement_type TEXT NOT NULL DEFAULT 'unknown'
         )
     """)
+
+    # Add provenance to existing databases without rewriting usage records.
+    columns = {
+        row[1] for row in cursor.execute("PRAGMA table_info(token_usage)")
+    }
+    if "measurement_type" not in columns:
+        cursor.execute(
+            "ALTER TABLE token_usage "
+            "ADD COLUMN measurement_type TEXT NOT NULL DEFAULT 'unknown'"
+        )
 
     # Agents configuration table
     cursor.execute("""
@@ -47,16 +66,26 @@ def init_db():
     conn.commit()
     conn.close()
 
-def log_event(agent_name, model_name, prompt_tokens, completion_tokens, cost_est=0.0):
+def log_event(
+    agent_name, model_name, prompt_tokens, completion_tokens,
+    cost_est=0.0, measurement_type="measured"
+):
+    if measurement_type not in {"measured", "estimated", "unknown"}:
+        raise ValueError("Invalid measurement_type")
+    if prompt_tokens < 0 or completion_tokens < 0 or cost_est < 0:
+        raise ValueError("Tokens and cost must not be negative")
+
     init_db()
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    cursor.execute("""
-        INSERT INTO token_usage (agent_name, model_name, prompt_tokens, completion_tokens, cost_est)
-        VALUES (?, ?, ?, ?, ?)
-    """, (agent_name, model_name, prompt_tokens, completion_tokens, cost_est))
-    conn.commit()
-    conn.close()
+    with sqlite3.connect(DB_PATH, timeout=10) as conn:
+        conn.execute("""
+            INSERT INTO token_usage (
+                agent_name, model_name, prompt_tokens, completion_tokens,
+                cost_est, measurement_type
+            ) VALUES (?, ?, ?, ?, ?, ?)
+        """, (
+            agent_name, model_name, prompt_tokens, completion_tokens,
+            cost_est, measurement_type
+        ))
 
 def get_today_summary():
     init_db()
@@ -78,16 +107,38 @@ def get_today_summary():
 
 if __name__ == "__main__":
     init_db()
-    if len(sys.argv) > 1 and sys.argv[1] == "--log":
-        if len(sys.argv) >= 6:
-            agent = sys.argv[2]
-            model = sys.argv[3]
-            p_tok = int(sys.argv[4])
-            c_tok = int(sys.argv[5])
-            cost = float(sys.argv[6]) if len(sys.argv) > 6 else 0.0
-            log_event(agent, model, p_tok, c_tok, cost)
-            print(f"[TokenGrid] Logged {p_tok + c_tok} tokens for {agent}")
+    if len(sys.argv) > 1 and sys.argv[1] in ("--log", "--log-estimate"):
+        if len(sys.argv) not in (6, 7):
+            print(
+                "Usage: tokengrid_daemon.py [--log|--log-estimate] "
+                "AGENT MODEL PROMPT_TOKENS COMPLETION_TOKENS [COST]",
+                file=sys.stderr,
+            )
+            sys.exit(2)
+
+        agent = sys.argv[2]
+        model = sys.argv[3]
+        p_tok = int(sys.argv[4])
+        c_tok = int(sys.argv[5])
+        cost = float(sys.argv[6]) if len(sys.argv) == 7 else 0.0
+        kind = "estimated" if sys.argv[1] == "--log-estimate" else "measured"
+        log_event(agent, model, p_tok, c_tok, cost, kind)
+        print(f"[TokenGrid] Logged {kind} usage for {agent}")
     else:
-        summary = get_today_summary()
-        print(f"⚡ {summary['total_tokens']} tok | ${summary['total_cost']:.4f}")
+        init_db()
+        with sqlite3.connect(DB_PATH) as conn:
+            row = conn.execute("""
+                SELECT
+                    COALESCE(SUM(CASE WHEN measurement_type='measured'
+                        THEN prompt_tokens + completion_tokens ELSE 0 END), 0),
+                    COALESCE(SUM(CASE WHEN measurement_type='measured'
+                        THEN cost_est ELSE 0 END), 0),
+                    COALESCE(SUM(CASE WHEN measurement_type='estimated'
+                        THEN prompt_tokens + completion_tokens ELSE 0 END), 0),
+                    COALESCE(SUM(CASE WHEN measurement_type='estimated'
+                        THEN cost_est ELSE 0 END), 0)
+                FROM token_usage WHERE date(timestamp)=date('now')
+            """).fetchone()
+        print(f"Measured: {row[0]} tok | ${row[1]:.4f}")
+        print(f"Estimated: {row[2]} tok | ${row[3]:.4f}")
         sys.stdout.flush()

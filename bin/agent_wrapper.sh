@@ -8,7 +8,7 @@ if [ -z "$AGENT_NAME" ]; then
     exit 1
 fi
 
-DAEMON_SCRIPT="$HOME/Devspace/Cybercore/ai/omarchy-plugins/tokengrid/bin/tokengrid_daemon.py"
+DAEMON_SCRIPT="$(dirname "${BASH_SOURCE[0]}")/tokengrid_daemon.py"
 
 # Execute target agent command
 START_TIME=$(date +%s)
@@ -22,7 +22,13 @@ ESTIMATED_TOKENS=$((DURATION * 15)) # Baseline standard execution estimation
 ESTIMATED_COST="0.0002"
 
 if [ -f "$DAEMON_SCRIPT" ]; then
-    python3 "$DAEMON_SCRIPT" --log "$AGENT_NAME" "default-model" "$ESTIMATED_TOKENS" 0 "$ESTIMATED_COST" > /dev/null 2>&1
+    if ! python3 "$DAEMON_SCRIPT" --log-estimate \
+        "$AGENT_NAME" "default-model" "$ESTIMATED_TOKENS" 0 "$ESTIMATED_COST" \
+        > /dev/null; then
+        echo "[TokenGrid] Warning: telemetry logging failed for $AGENT_NAME" >&2
+    fi
+else
+    echo "[TokenGrid] Warning: telemetry daemon not found: $DAEMON_SCRIPT" >&2
 fi
 
 exit $EXIT_CODE
