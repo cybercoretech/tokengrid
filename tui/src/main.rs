@@ -354,7 +354,22 @@ fn get_db_path() -> PathBuf {
     let home = std::env::var_os("HOME")
         .map(PathBuf::from)
         .unwrap_or_else(|| PathBuf::from("."));
-    home.join(".config/omarchy/plugins/io.github.cybercoretech.tokengrid/data/tokengrid.db")
+    // Runtime state lives outside the plugin directory: the shell watches
+    // ~/.config/omarchy/plugins with inotify and hot-reloads the whole bar
+    // on any write inside it, so a database in the plugin dir would reload
+    // the bar every time the TUI opens.
+    let path = home.join(".local/share/omarchy/tokengrid/tokengrid.db");
+    let legacy = home.join(
+        ".config/omarchy/plugins/io.github.cybercoretech.tokengrid/data/tokengrid.db",
+    );
+    // One-time migration: adopt a pre-0.2 database still in the plugin dir.
+    if !path.exists() && legacy.exists() {
+        if let Some(parent) = path.parent() {
+            let _ = std::fs::create_dir_all(parent);
+        }
+        let _ = std::fs::copy(&legacy, &path);
+    }
+    path
 }
 
 fn delete_agent_db(id: i64) -> Result<(), Box<dyn Error>> {

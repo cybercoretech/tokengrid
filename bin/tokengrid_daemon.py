@@ -1,18 +1,29 @@
 #!/usr/bin/env python3
 import os
 import sys
+import shutil
 import sqlite3
 from pathlib import Path
 
 DB_PATH = Path(
     os.environ.get(
         "TOKENGRID_DB_PATH",
-        str(
-            Path.home()
-            / ".config/omarchy/plugins/io.github.cybercoretech.tokengrid/data/tokengrid.db"
-        ),
+        str(Path.home() / ".local/share/omarchy/tokengrid/tokengrid.db"),
     )
 ).expanduser()
+
+# Runtime state lives outside the plugin directory: the shell watches
+# ~/.config/omarchy/plugins with inotify and hot-reloads the whole bar on
+# any write inside it. One-time migration: adopt a pre-0.2 database that
+# still sits in the plugin dir.
+if "TOKENGRID_DB_PATH" not in os.environ:
+    _legacy_db = (
+        Path.home()
+        / ".config/omarchy/plugins/io.github.cybercoretech.tokengrid/data/tokengrid.db"
+    )
+    if not DB_PATH.exists() and _legacy_db.exists():
+        DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy(_legacy_db, DB_PATH)
 
 INITIAL_AGENTS = [
     "gemini", "claude", "crush", "cursor-agent", "codex", "copilot", 
