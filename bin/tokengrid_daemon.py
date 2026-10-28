@@ -66,7 +66,9 @@ def init_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             agent_name TEXT UNIQUE NOT NULL,
             model_default TEXT DEFAULT 'default',
-            budget_limit REAL DEFAULT 10.0
+            budget_limit REAL DEFAULT 10.0,
+            daily_token_limit INTEGER NOT NULL DEFAULT 1000000,
+            weekly_token_limit INTEGER NOT NULL DEFAULT 7000000
         )
     """)
 
@@ -107,7 +109,7 @@ def get_today_summary():
             SUM(prompt_tokens + completion_tokens),
             SUM(cost_est)
         FROM token_usage
-        WHERE date(timestamp) = date('now')
+        WHERE date(timestamp, 'localtime') = date('now', 'localtime')
     """)
     row = cursor.fetchone()
     conn.close()

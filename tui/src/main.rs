@@ -3,7 +3,7 @@ use std::io;
 use std::path::PathBuf;
 use std::time::Duration;
 
-use chrono::{Local, TimeZone};
+use chrono::{DateTime, Datelike, Days, Local, TimeZone};
 use crossterm::{
     event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode},
     execute,
@@ -11,12 +11,13 @@ use crossterm::{
 };
 use ratatui::{
     backend::CrosstermBackend,
-    layout::{Constraint, Direction, Layout},
+    layout::{Alignment, Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
-    widgets::{Block, Borders, Cell, Clear, Paragraph, Row, Table},
+    text::Span,
+    widgets::{Block, Borders, Cell, Clear, Gauge, Paragraph, Row, Table},
     Frame, Terminal,
 };
-use rusqlite::{Connection, OpenFlags};
+use rusqlite::{params, Connection, OpenFlags};
 
 #[derive(Clone)]
 struct AgentRow {
@@ -40,11 +41,22 @@ struct AgentDetailData {
     recent_requests: Vec<(String, String, i64, i64, f64, String)>,
 }
 
+/// One card on the Limits screen: local-day/week usage against token caps.
+struct LimitRow {
+    id: i64,
+    name: String,
+    tokens_today: i64,
+    tokens_week: i64,
+    daily_cap: i64,
+    weekly_cap: i64,
+}
+
 #[derive(Clone, PartialEq)]
 enum AppState {
     Normal,
     Detail(String),
     Settings,
+    Limits,
     ConfirmDelete {
         id: i64,
         name: String,
@@ -61,6 +73,7 @@ enum AppState {
 struct App {
     state: AppState,
     agents: Vec<AgentRow>,
+    limits: Vec<LimitRow>,
     selected_index: usize,
     should_quit: bool,
 }
@@ -70,6 +83,7 @@ impl App {
         let mut app = Self {
             state: AppState::Normal,
             agents: Vec::new(),
+            limits: Vec::new(),
             selected_index: 0,
             should_quit: false,
         };
@@ -88,10 +102,13 @@ impl App {
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 agent_name TEXT UNIQUE NOT NULL,
                 model_default TEXT DEFAULT 'default',
-                budget_limit REAL DEFAULT 10.0
+                budget_limit REAL DEFAULT 10.0,
+                daily_token_limit INTEGER NOT NULL DEFAULT 1000000,
+                weekly_token_limit INTEGER NOT NULL DEFAULT 7000000
             )",
             [],
         )?;
+        ensure_agents_schema(&conn)?;
 
         let mut stmt = conn.prepare("SELECT COUNT(*) FROM agents")?;
         let count: i64 = stmt.query_row([], |row| row.get(0))?;
@@ -125,17 +142,26 @@ impl App {
             }
         }
 
+        // Local calendar boundaries: hub, detail and limits all agree that
+        // "today" starts at local midnight (countdowns target the same wall).
+        let today_naive = Local::now().date_naive();
+        let today = today_naive.format("%Y-%m-%d").to_string();
+        let week_start = (today_naive
+            - Days::new(today_naive.weekday().num_days_from_monday() as u64))
+        .format("%Y-%m-%d")
+        .to_string();
+
         let mut stmt = conn.prepare(
             "SELECT a.id, a.agent_name, a.model_default, a.budget_limit,
-                    COALESCE(SUM(CASE WHEN t.measurement_type = 'measured' AND date(t.timestamp) = date('now') THEN (t.prompt_tokens + t.completion_tokens) ELSE 0 END), 0) as tok_sum,
-                    COALESCE(SUM(CASE WHEN t.measurement_type = 'measured' AND date(t.timestamp) = date('now') THEN t.cost_est ELSE 0.0 END), 0.0) as cost_sum
+                    COALESCE(SUM(CASE WHEN t.measurement_type = 'measured' AND date(t.timestamp, 'localtime') = date(?1) THEN (t.prompt_tokens + t.completion_tokens) ELSE 0 END), 0) as tok_sum,
+                    COALESCE(SUM(CASE WHEN t.measurement_type = 'measured' AND date(t.timestamp, 'localtime') = date(?1) THEN t.cost_est ELSE 0.0 END), 0.0) as cost_sum
              FROM agents a
              LEFT JOIN token_usage t ON a.agent_name = t.agent_name
              GROUP BY a.id, a.agent_name, a.model_default, a.budget_limit
              ORDER BY a.agent_name ASC",
         )?;
 
-        let agent_iter = stmt.query_map([], |row| {
+        let agent_iter = stmt.query_map(params![today], |row| {
             Ok(AgentRow {
                 id: row.get(0)?,
                 name: row.get(1)?,
@@ -150,6 +176,36 @@ impl App {
         for agent in agent_iter {
             if let Ok(item) = agent {
                 self.agents.push(item);
+            }
+        }
+
+        // Limits screen: local-day / calendar-week measured usage vs caps.
+        let mut stmt = conn.prepare(
+            "SELECT a.id, a.agent_name,
+                    COALESCE(SUM(CASE WHEN t.measurement_type = 'measured' AND date(t.timestamp, 'localtime') = date(?1) THEN (t.prompt_tokens + t.completion_tokens) ELSE 0 END), 0),
+                    COALESCE(SUM(CASE WHEN t.measurement_type = 'measured' AND date(t.timestamp, 'localtime') >= date(?2) THEN (t.prompt_tokens + t.completion_tokens) ELSE 0 END), 0),
+                    a.daily_token_limit, a.weekly_token_limit
+             FROM agents a
+             LEFT JOIN token_usage t ON a.agent_name = t.agent_name
+             GROUP BY a.id, a.agent_name, a.daily_token_limit, a.weekly_token_limit
+             ORDER BY a.agent_name ASC",
+        )?;
+
+        let limit_iter = stmt.query_map(params![today, week_start], |row| {
+            Ok(LimitRow {
+                id: row.get(0)?,
+                name: row.get(1)?,
+                tokens_today: row.get(2)?,
+                tokens_week: row.get(3)?,
+                daily_cap: row.get(4)?,
+                weekly_cap: row.get(5)?,
+            })
+        })?;
+
+        self.limits.clear();
+        for limit in limit_iter {
+            if let Ok(item) = limit {
+                self.limits.push(item);
             }
         }
 
@@ -205,6 +261,49 @@ impl App {
                 }
                 KeyCode::Char('s') | KeyCode::Char('S') => {
                     self.state = AppState::Settings;
+                }
+                KeyCode::Char('l') | KeyCode::Char('L') => {
+                    self.state = AppState::Limits;
+                }
+                _ => {}
+            },
+            AppState::Limits => match code {
+                KeyCode::Char('q') | KeyCode::Char('Q') | KeyCode::Esc => {
+                    self.state = AppState::Normal;
+                }
+                KeyCode::Char('j') | KeyCode::Char('J') | KeyCode::Down => {
+                    if !self.agents.is_empty() && self.selected_index < self.agents.len() - 1 {
+                        self.selected_index += 1;
+                    }
+                }
+                KeyCode::Char('k') | KeyCode::Char('K') | KeyCode::Up => {
+                    if self.selected_index > 0 {
+                        self.selected_index -= 1;
+                    }
+                }
+                KeyCode::Char('+') | KeyCode::Char('=') => {
+                    if let Some(id) = self.limits.get(self.selected_index).map(|l| l.id) {
+                        adjust_token_cap(id, true, true);
+                        let _ = self.refresh_data();
+                    }
+                }
+                KeyCode::Char('-') => {
+                    if let Some(id) = self.limits.get(self.selected_index).map(|l| l.id) {
+                        adjust_token_cap(id, true, false);
+                        let _ = self.refresh_data();
+                    }
+                }
+                KeyCode::Char(']') => {
+                    if let Some(id) = self.limits.get(self.selected_index).map(|l| l.id) {
+                        adjust_token_cap(id, false, true);
+                        let _ = self.refresh_data();
+                    }
+                }
+                KeyCode::Char('[') => {
+                    if let Some(id) = self.limits.get(self.selected_index).map(|l| l.id) {
+                        adjust_token_cap(id, false, false);
+                        let _ = self.refresh_data();
+                    }
                 }
                 _ => {}
             },
@@ -379,6 +478,37 @@ fn ensure_ledger_schema(conn: &Connection) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
+/// Create/upgrade the agents schema — the Limits screen needs the
+/// per-agent daily/weekly token caps (defaults: 1M/day, 7M/week).
+fn ensure_agents_schema(conn: &Connection) -> Result<(), Box<dyn Error>> {
+    for (col, ddl) in [
+        (
+            "daily_token_limit",
+            "ALTER TABLE agents ADD COLUMN daily_token_limit INTEGER NOT NULL DEFAULT 1000000",
+        ),
+        (
+            "weekly_token_limit",
+            "ALTER TABLE agents ADD COLUMN weekly_token_limit INTEGER NOT NULL DEFAULT 7000000",
+        ),
+    ] {
+        let mut found = false;
+        {
+            let mut stmt = conn.prepare("PRAGMA table_info(agents)")?;
+            let rows = stmt.query_map([], |row| row.get::<_, String>(1))?;
+            for column in rows {
+                if column? == col {
+                    found = true;
+                    break;
+                }
+            }
+        }
+        if !found {
+            conn.execute(ddl, [])?;
+        }
+    }
+    Ok(())
+}
+
 /// Extract the model id from opencode's JSON model column:
 /// `{"id":"mimo-v2.6-flash-free","providerID":"opencode"}` → `mimo-v2.6-flash-free`.
 fn opencode_model_id(raw: &str) -> String {
@@ -539,6 +669,70 @@ fn sync_opencode_usage() {
     let _ = tx.commit();
 }
 
+/// Compact token formatting for gauge labels: 1.94M / 850.0k / 742.
+fn fmt_tokens(n: i64) -> String {
+    if n >= 1_000_000_000 {
+        format!("{:.2}B", n as f64 / 1e9)
+    } else if n >= 1_000_000 {
+        format!("{:.2}M", n as f64 / 1e6)
+    } else if n >= 1_000 {
+        format!("{:.1}k", n as f64 / 1e3)
+    } else {
+        n.to_string()
+    }
+}
+
+/// Compact countdown to a reset boundary: "2d 05h" / "9h 13m" / "42m".
+fn fmt_until(target: DateTime<Local>) -> String {
+    let secs = (target - Local::now()).num_seconds().max(0);
+    let d = secs / 86_400;
+    let h = (secs % 86_400) / 3_600;
+    let m = (secs % 3_600) / 60;
+    if d > 0 {
+        format!("{}d {:02}h", d, h)
+    } else if h > 0 {
+        format!("{}h {:02}m", h, m)
+    } else {
+        format!("{}m", m)
+    }
+}
+
+/// Next local midnight — the daily reset the Limits countdown targets.
+fn next_daily_reset() -> DateTime<Local> {
+    (Local::now().date_naive() + Days::new(1))
+        .and_hms_opt(0, 0, 0)
+        .and_then(|naive| naive.and_local_timezone(Local).latest())
+        .unwrap_or_else(Local::now)
+}
+
+/// Next Monday 00:00 local — the weekly reset.
+fn next_weekly_reset() -> DateTime<Local> {
+    let now = Local::now();
+    let days_to_monday = 7 - now.date_naive().weekday().num_days_from_monday() as u64;
+    (now.date_naive() + Days::new(days_to_monday))
+        .and_hms_opt(0, 0, 0)
+        .and_then(|naive| naive.and_local_timezone(Local).latest())
+        .unwrap_or_else(Local::now)
+}
+
+/// Double/halve a cap from the Limits screen, clamped to [1k, 2B].
+fn adjust_token_cap(agent_id: i64, daily: bool, up: bool) {
+    let conn = match Connection::open(get_db_path()) {
+        Ok(conn) => conn,
+        Err(_) => return,
+    };
+    let col = if daily {
+        "daily_token_limit"
+    } else {
+        "weekly_token_limit"
+    };
+    let sql = format!(
+        "UPDATE agents SET {col} = CASE WHEN ?1 THEN MIN({col} * 2, 2000000000) \
+         ELSE MAX({col} / 2, 1000) END WHERE id = ?2"
+    );
+    let _ = conn.execute(&sql, params![up, agent_id]);
+}
+
 fn delete_agent_db(id: i64) -> Result<(), Box<dyn Error>> {
     let conn = Connection::open(get_db_path())?;
     conn.execute("DELETE FROM agents WHERE id = ?1", rusqlite::params![id])?;
@@ -568,10 +762,11 @@ fn fetch_agent_details(agent_name: &str) -> Result<AgentDetailData, Box<dyn Erro
     let mut stmt_today = conn.prepare(
         "SELECT COALESCE(SUM(prompt_tokens + completion_tokens), 0), COALESCE(SUM(cost_est), 0.0)
          FROM token_usage WHERE agent_name = ?1
-         AND measurement_type = 'measured' AND date(timestamp) = date('now')",
+         AND measurement_type = 'measured' AND date(timestamp, 'localtime') = date(?2)",
     )?;
+    let today_str = Local::now().date_naive().format("%Y-%m-%d").to_string();
     let (today_tokens, today_cost) = stmt_today
-        .query_row(rusqlite::params![agent_name], |row| {
+        .query_row(params![agent_name, today_str], |row| {
             Ok((row.get::<_, i64>(0)?, row.get::<_, f64>(1)?))
         })
         .unwrap_or((0, 0.0));
@@ -764,7 +959,7 @@ fn ui(f: &mut Frame<'_>, app: &App) {
                 ],
             )
             .header(header_row)
-            .block(Block::default().borders(Borders::ALL).title(" Agent Management [j/k: navigate, Enter: details, a: add, d: delete, s: settings, q: quit] "));
+            .block(Block::default().borders(Borders::ALL).title(" Agent Management [j/k: navigate, Enter: details, a: add, d: delete, s: settings, l: limits, q: quit] "));
 
             f.render_widget(table, chunks[2]);
 
@@ -888,6 +1083,107 @@ fn ui(f: &mut Frame<'_>, app: &App) {
             f.render_widget(summary_para, detail_chunks[0]);
             f.render_widget(req_table, detail_chunks[1]);
         }
+        AppState::Limits => {
+            let area = chunks[2];
+            let card_h: u16 = 4; // borders (2) + two gauge rows
+            let visible = ((area.height.saturating_sub(2)) / card_h).max(1) as usize;
+            let total = app.limits.len();
+            let sel = app.selected_index.min(total.saturating_sub(1));
+            let start = if total <= visible {
+                0
+            } else {
+                sel.saturating_sub(visible - 1).min(total - visible)
+            };
+            let end = (start + visible).min(total);
+
+            for (i, item) in app.limits.iter().enumerate().skip(start).take(end - start) {
+                let top = area.y + 1 + ((i - start) as u16) * card_h;
+                let card = Rect {
+                    x: area.x + 1,
+                    y: top,
+                    width: area.width.saturating_sub(2),
+                    height: card_h,
+                };
+                let block = Block::default()
+                    .borders(Borders::ALL)
+                    .title(format!(" {} ", item.name))
+                    .border_style(if i == sel {
+                        Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD)
+                    } else {
+                        Style::default().fg(Color::DarkGray)
+                    });
+                f.render_widget(block, card);
+
+                let inner = Rect {
+                    x: card.x + 1,
+                    y: card.y + 1,
+                    width: card.width.saturating_sub(2),
+                    height: 2,
+                };
+                let rows = Layout::default()
+                    .direction(Direction::Vertical)
+                    .constraints([Constraint::Length(1), Constraint::Length(1)].as_ref())
+                    .split(inner);
+
+                let windows = [
+                    ("Daily", item.tokens_today, item.daily_cap, next_daily_reset()),
+                    (
+                        "Weekly",
+                        item.tokens_week,
+                        item.weekly_cap,
+                        next_weekly_reset(),
+                    ),
+                ];
+                for (row_idx, (label, used, cap, reset)) in windows.iter().enumerate() {
+                    let cols = Layout::default()
+                        .direction(Direction::Horizontal)
+                        .constraints(
+                            [
+                                Constraint::Length(8),
+                                Constraint::Min(10),
+                                Constraint::Length(11),
+                            ]
+                            .as_ref(),
+                        )
+                        .split(rows[row_idx]);
+                    f.render_widget(
+                        Paragraph::new(*label)
+                            .style(Style::default().fg(Color::White).add_modifier(Modifier::BOLD)),
+                        cols[0],
+                    );
+
+                    let ratio = if *cap > 0 {
+                        (*used as f64 / *cap as f64).clamp(0.0, 1.0)
+                    } else {
+                        0.0
+                    };
+                    let bar_fg = if *cap > 0 && *used >= *cap {
+                        Color::Red
+                    } else if ratio >= 0.75 {
+                        Color::Yellow
+                    } else {
+                        Color::Cyan
+                    };
+                    f.render_widget(
+                        Gauge::default()
+                            .gauge_style(Style::default().fg(bar_fg))
+                            .ratio(ratio)
+                            .label(Span::styled(
+                                format!("{} / {}", fmt_tokens(*used), fmt_tokens(*cap)),
+                                Style::default().fg(Color::White).add_modifier(Modifier::BOLD),
+                            )),
+                        cols[1],
+                    );
+
+                    f.render_widget(
+                        Paragraph::new(fmt_until(*reset))
+                            .style(Style::default().fg(Color::Cyan))
+                            .alignment(Alignment::Right),
+                        cols[2],
+                    );
+                }
+            }
+        }
         AppState::Settings => {
             let settings_text = format!(
                 "=== TOKENGRID CONFIGURATION & SETTINGS ===\n\nActive Database Path: {}\nGlobal Daily Budget Cap: $50.00 (Configured in SQLite)\nWebhook Alerts URL: https://discord.com/api/webhooks/example\n\n[Press 's', 'Esc', or 'Enter' to return to Agent List]",
@@ -905,7 +1201,8 @@ fn ui(f: &mut Frame<'_>, app: &App) {
     }
 
     let footer_text = match &app.state {
-        AppState::Normal => "Vim Keys: [j/k] Navigate  [Enter] Agent Details  [a] Add  [d] Delete  [s] Settings  [q] Quit",
+        AppState::Normal => "Vim Keys: [j/k] Navigate  [Enter] Agent Details  [a] Add  [d] Delete  [s] Settings  [l] Limits  [q] Quit",
+        AppState::Limits => "Vim Keys: [j/k] Scroll  [-/+] Daily Cap  [[/]] Weekly Cap  [Esc/q] Back to Hub",
         AppState::Adding { .. } => "Form Input: [Tab/Up/Down] Switch Field  [Enter] Next/Submit  [Esc] Cancel",
         AppState::Detail(_) => "Press [Esc], [Enter], or [q] to return to Agent List",
         AppState::Settings => "Press [Esc], [Enter], or [s] to return to Agent List",
