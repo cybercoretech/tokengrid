@@ -4,10 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>TokenGrid — AI token telemetry for your Omarchy bar</title>
-  <meta name="description" content="TokenGrid: an Omarchy bar widget and Rust TUI that tracks tokens, cost, and budget caps across 19 CLI AI agents — one SQLite ledger, live from the status bar.">
+  <meta name="description" content="TokenGrid: an Omarchy plugin that tracks tokens, cost and budget caps across 19 CLI AI agents — one local SQLite ledger with measured/estimated provenance, surfaced in your status bar and an interactive Rust TUI.">
   <meta name="theme-color" content="#09080f">
   <meta property="og:title" content="TokenGrid — AI token telemetry for Omarchy">
-  <meta property="og:description" content="19 CLI AI agents, one SQLite ledger: live token counts, cost, and budget caps from the Omarchy status bar.">
+  <meta property="og:description" content="19 CLI AI agents, one local SQLite ledger: token counts, cost and budget caps — provenance-tagged, live in the Omarchy bar and a keyboard-driven Rust TUI.">
   <meta property="og:image" content="https://cybercoretech.github.io/tokengrid/assets/img/social-card.png">
   <meta property="og:url" content="https://cybercoretech.github.io/tokengrid/">
   <meta name="twitter:card" content="summary_large_image">
@@ -62,8 +62,8 @@
       <div>
         <p class="eyebrow">AI token telemetry · Omarchy · Rust · ratatui</p>
         <h1><span class="glitch" data-text="TOKEN">TOKEN</span><br><em>GRID</em></h1>
-        <p class="tagline">Every agent you run, every token it burns — counted from the status bar.</p>
-        <p class="lede">A QML bar widget shows today's tokens and dollars. A zsh wrapper watches <b>19 CLI AI agents</b> as they execute and writes each run into a local SQLite ledger. A Rust TUI opens from the bar and lays the ledger bare: totals on top, the last 50 requests below, budget caps in plain numbers. Nothing leaves your machine.</p>
+        <p class="tagline">Every agent you run, every token it burns — counted in one local ledger.</p>
+        <p class="lede">A bar payload puts today's tokens and dollars in the status bar. A zsh wrapper watches <b>19 CLI AI agents</b> as they execute and writes each run into a local SQLite ledger — every row tagged measured or estimated. One click opens a Rust TUI hub: totals on top, the full roster with budgets below, and add, delete and settings from the keyboard. Nothing leaves your machine.</p>
         <div class="chips"><span class="chip"><b>◆</b> 19 AGENTS</span><span class="chip"><b>◆</b> SQLITE LEDGER</span><span class="chip"><b>◆</b> BUDGET CAPS</span><span class="chip"><b>◆</b> MIT</span></div>
         <div class="cta"><a class="btn" href="https://github.com/cybercoretech/tokengrid">VIEW SOURCE ↗</a><a class="btn ghost" href="#setup">INSTALL</a></div>
       </div>
@@ -88,9 +88,9 @@
       <div class="section-head reveal"><div><p class="eyebrow">01 / Pipeline</p><h2>One run,<br><em>one record.</em></h2></div><p>No proxy, no cloud, no API key. Your alias runs the agent, the wrapper times it, the daemon writes the row, and both surfaces read the same file. Five hops, all local.</p></div>
       <div class="pipeline reveal">
         <div class="step"><h3>ALIAS</h3><p><code>config/tokengrid_aliases.zsh</code> wraps all 19 agent commands in your shell.</p></div>
-        <div class="step"><h3>WRAPPER</h3><p><code>bin/agent_wrapper.sh</code> executes the agent and measures wall-clock duration.</p></div>
-        <div class="step"><h3>DAEMON</h3><p><code>bin/tokengrid_daemon.py</code> logs agent, model, tokens and cost.</p></div>
-        <div class="step"><h3>LEDGER</h3><p><code>data/tokengrid.db</code> — SQLite <code>token_usage</code> + <code>agents</code> tables.</p></div>
+        <div class="step"><h3>WRAPPER</h3><p><code>bin/agent_wrapper.sh</code> executes the agent, times it, and writes an estimated baseline row.</p></div>
+        <div class="step"><h3>DAEMON</h3><p><code>bin/tokengrid_daemon.py</code> logs agent, model, tokens and cost with a provenance tag.</p></div>
+        <div class="step"><h3>LEDGER</h3><p><code>data/tokengrid.db</code> — SQLite <code>token_usage</code> (<code>measurement_type</code>) + <code>agents</code>; path overridable via <code>TOKENGRID_DB_PATH</code>.</p></div>
         <div class="step"><h3>SURFACE</h3><p>Bar payload and Rust TUI render the same rows, instantly.</p></div>
       </div>
       <div class="stats reveal">
@@ -108,25 +108,25 @@
       </div>
       <div class="grid g3" style="margin-top:1.6rem">
         <div class="card c-acid reveal"><span class="num">◆ PRE-SEEDED</span><h3>THE ROSTER</h3><p><code>INITIAL_AGENTS</code> inserts every wrapper on first run with <code>INSERT OR IGNORE</code> — rerun it as often as you like, nothing duplicates.</p></div>
-        <div class="card c-pink reveal"><span class="num">◆ PER AGENT</span><h3>BUDGET CAPS</h3><p>Every agent carries <code>budget_limit REAL DEFAULT 10.0</code>. Push a cap, and the tile turns red on the bar long before your card does.</p></div>
+        <div class="card c-pink reveal"><span class="num">◆ PER AGENT</span><h3>BUDGET CAPS</h3><p>Every agent carries <code>budget_limit REAL DEFAULT 10.0</code>. The table keeps every cap beside today's burn — you see the gap long before the invoice does.</p></div>
         <div class="card c-cyan reveal"><span class="num">◆ SIDE CHANNEL</span><h3>SYSTEM METRICS</h3><p><code>metrics-collector.py</code> samples CPU, memory, disk and network via psutil into daily, weekly and monthly JSON aggregates.</p></div>
       </div>
     </section>
 
     <section class="wrap section" id="tui">
-      <div class="section-head reveal"><div><p class="eyebrow">03 / The TUI</p><h2>Totals first,<br><em>rows after.</em></h2></div><p>Click the bar icon and Ghostty opens the compiled binary in a precision-floated window. The summary block answers the only question that matters — tokens and dollars today — then the last 50 requests, newest first.</p></div>
+      <div class="section-head reveal"><div><p class="eyebrow">03 / The TUI</p><h2>Totals first,<br><em>rows after.</em></h2></div><p>Click the bar icon and Ghostty opens the compiled binary in a precision-floated window. Today's totals sit on top; underneath, the whole roster — model, budget, today's burn — and vim keys take you everywhere else in the hub.</p></div>
       <div class="rules">
-        <ul class="list reveal"><li><b>Summary overview</b> — total tokens, total cost, active agents, one line.</li><li><b>Last 50 rows</b> — timestamp, agent, model, tokens, cost, straight from SQLite.</li><li><b>24-hour history</b> — the table block is titled for the day, not an all-time fog.</li><li><b>Draw and exit</b> — renders once, holds eight seconds, closes clean. No orphaned process.</li></ul>
+        <ul class="list reveal"><li><b>Daily overview</b> — today's measured tokens, total cost and monitored agents, one bordered line.</li><li><b>Agent table</b> — name, model, budget, tokens and cost today; <code>j/k</code> to move, Enter to open.</li><li><b>Drill-down</b> — per-agent today and 7-day totals plus the last eight runs, each row tagged measured or estimated.</li><li><b>Full control</b> — add an agent, delete one by typing its name, or open settings for the DB path, the $50 daily cap and webhook — no restart.</li></ul>
         <div class="console reveal">
           <div class="console-head"><span>● ● ● &nbsp; tokengrid-tui</span><strong>BAR FEED</strong></div>
-          <pre class="term" data-type><span><span class="t-prompt">❯</span> tokengrid_daemon.py</span><span class="t-ok">⚡ 412650 tok | $1.2841</span><span> </span><span><span class="t-prompt">❯</span> tokengrid-tui   <span class="t-dim"># what the bar icon opens</span></span><span class="t-dim">┌ TokenGrid Telemetry Hub - Detailed Metrics ┐</span><span class="t-dim">│ TOTALS -&gt; Tokens: 412650 | Cost: $1.2841  │</span><span class="t-prompt">│ TIMESTAMP  AGENT   MODEL   TOKENS   COST   │</span><span class="t-dim">└ Agent Usage History (Last 24 Hours) ┘</span></pre>
+          <pre class="term" data-type><span><span class="t-prompt">❯</span> tokengrid_daemon.py</span><span class="t-ok">Measured: 412650 tok | $1.2841</span><span class="t-dim">Estimated: 96450 tok | $0.0060</span><span><span class="t-prompt">❯</span> tokengrid-tui   <span class="t-dim"># what the bar icon opens</span></span><span class="t-dim">┌ TokenGrid Telemetry Hub -------------------┐</span><span class="t-prompt">│ Today's Total Tokens: 412650               │</span><span class="t-prompt">│ Total Cost: $1.2841 · Monitored Agents: 19 │</span><span class="t-dim">│ AGENT   MODEL    BUDGET   TOKENS TODAY     │</span><span class="t-dim">└ j/k · Enter · a · d · s · q · esc → back   ┘</span></pre>
         </div>
       </div>
       <div class="grid g4" style="margin-top:1.4rem">
-        <div class="card c-acid reveal"><span class="num">01</span><h3>SUMMARY LINE</h3><p>Tokens and cost for today, computed on read.</p></div>
-        <div class="card c-cyan reveal"><span class="num">02</span><h3>LAST 50 ROWS</h3><p>Newest requests first, five columns wide.</p></div>
-        <div class="card c-pink reveal"><span class="num">03</span><h3>24H HISTORY</h3><p>The day's full agent usage block.</p></div>
-        <div class="card c-orange reveal"><span class="num">04</span><h3>CLEAN EXIT</h3><p>Eight seconds on screen, then gone.</p></div>
+        <div class="card c-acid reveal"><span class="num">01</span><h3>DAILY OVERVIEW</h3><p>Measured tokens, cost and agent count for today.</p></div>
+        <div class="card c-cyan reveal"><span class="num">02</span><h3>AGENT TABLE</h3><p>Model, budget and today's burn — j/k to move.</p></div>
+        <div class="card c-pink reveal"><span class="num">03</span><h3>DRILL-DOWN</h3><p>Today and 7-day totals plus a provenance-tagged log.</p></div>
+        <div class="card c-orange reveal"><span class="num">04</span><h3>FULL CONTROL</h3><p>Add, delete and settings — no restart, no second window.</p></div>
       </div>
     </section>
 
@@ -139,6 +139,7 @@
 cd ~/.config/omarchy/plugins/io.github.cybercoretech.tokengrid
 
 ./bin/build_tui.sh          <span class="c"># cargo build --release -&gt; bin/tokengrid-tui</span>
+./bin/build_tui.sh --install <span class="c"># same, plus copy it into the plugin dir</span>
 
 <span class="c"># register the bar widget + window rule</span>
 omarchy-shell shell rescanPlugins
