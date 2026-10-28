@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="TokenGrid favicon">
+  <rect x="4" y="4" width="25" height="25" fill="#00e5ff"/>
+  <rect x="35" y="4" width="25" height="25" fill="#16151f" stroke="#32303e" stroke-width="3"/>
+  <rect x="4" y="35" width="25" height="25" fill="#16151f" stroke="#32303e" stroke-width="3"/>
+  <rect x="35" y="35" width="25" height="25" fill="#39ff33"/>
+  <path d="M44 10l-8 14h7l-3 10 10-15h-7l4-9z" fill="#ff147f"/>
+</svg>

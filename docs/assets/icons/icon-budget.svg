@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Budget cap">
+  <path d="M10 46a22 22 0 0 1 44 0" fill="none" stroke="#32303e" stroke-width="6" stroke-linecap="round"/>
+  <path d="M10 46a22 22 0 0 1 26-21" fill="none" stroke="#39ff33" stroke-width="6" stroke-linecap="round"/>
+  <path d="M36 25a22 22 0 0 1 14 15" fill="none" stroke="#ff147f" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="32" cy="46" r="5" fill="#00e5ff"/>
+  <path d="M32 46 44 30" stroke="#00e5ff" stroke-width="4" stroke-linecap="round"/>
+</svg>

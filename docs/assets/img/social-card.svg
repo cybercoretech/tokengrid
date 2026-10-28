@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630" role="img" aria-label="TokenGrid social card">
+  <defs>
+    <linearGradient id="s-em" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#00e5ff"/><stop offset="1" stop-color="#39ff33"/>
+    </linearGradient>
+    <pattern id="s-grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0v40" fill="none" stroke="#32303e" stroke-width="1" opacity=".5"/>
+    </pattern>
+    <radialGradient id="s-glow" cx=".85" cy=".1" r=".9">
+      <stop offset="0" stop-color="#00e5ff" stop-opacity=".28"/><stop offset="1" stop-color="#00e5ff" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="s-glow2" cx=".05" cy="1" r=".8">
+      <stop offset="0" stop-color="#ff147f" stop-opacity=".22"/><stop offset="1" stop-color="#ff147f" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="630" fill="#09080f"/>
+  <rect width="1200" height="630" fill="url(#s-grid)"/>
+  <rect width="1200" height="630" fill="url(#s-glow)"/>
+  <rect width="1200" height="630" fill="url(#s-glow2)"/>
+  <rect width="1200" height="8" fill="#00e5ff"/>
+  <rect y="622" width="1200" height="8" fill="#39ff33"/>
+  <g transform="translate(72 92)">
+    <g><rect x="0" y="0" width="72" height="72" fill="#00e5ff"/><rect x="84" y="0" width="72" height="72" fill="#16151f" stroke="#32303e" stroke-width="5"/><rect x="0" y="84" width="72" height="72" fill="#16151f" stroke="#32303e" stroke-width="5"/><rect x="84" y="84" width="72" height="72" fill="#39ff33"/></g>
+    <g font-family="DejaVu Sans, sans-serif" font-weight="bold">
+      <text x="200" y="72" font-size="78" letter-spacing="4" fill="url(#s-em)">TOKEN</text>
+      <text x="200" y="152" font-size="78" letter-spacing="18" fill="#f0f0f2">GRID</text>
+    </g>
+  </g>
+  <text x="76" y="384" font-family="DejaVu Sans, sans-serif" font-weight="bold" font-size="44" fill="#f0f0f2">Every agent you run, every token it burns —</text>
+  <text x="76" y="440" font-family="DejaVu Sans, sans-serif" font-weight="bold" font-size="44" fill="#00e5ff">counted from the status bar.</text>
+  <g font-family="DejaVu Sans Mono, monospace" font-size="24" fill="#807f8b">
+    <text x="76" y="516">19 CLI AI AGENTS · SQLITE LEDGER · BUDGET CAPS · RUST TUI</text>
+    <text x="76" y="564" letter-spacing="4" fill="#39ff33">cybercoretech.github.io/tokengrid</text>
+  </g>
+  <g transform="translate(944 384)">
+    <rect width="184" height="132" fill="#16151f" stroke="#32303e" stroke-width="3"/>
+    <rect width="184" height="30" fill="#09080f"/>
+    <circle cx="18" cy="15" r="5" fill="#ff147f"/><circle cx="36" cy="15" r="5" fill="#ff9000"/><circle cx="54" cy="15" r="5" fill="#39ff33"/>
+    <g font-family="DejaVu Sans Mono, monospace" font-size="19">
+      <text x="16" y="62" fill="#f0f0f2">⚡ 412.7k</text>
+      <text x="16" y="92" fill="#00e5ff">$1.2841</text>
+      <text x="16" y="120" fill="#ff147f">kimi: OVER CAP</text>
+    </g>
+  </g>
+</svg>

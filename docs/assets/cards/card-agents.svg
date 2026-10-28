@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500" role="img" aria-label="TokenGrid agent roster card">
+  <defs>
+    <pattern id="p3g" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0H0v32" fill="none" stroke="#32303e" stroke-width="1" opacity=".5"/></pattern>
+  </defs>
+  <rect width="800" height="500" fill="#09080f"/>
+  <rect width="800" height="500" fill="url(#p3g)"/>
+  <rect width="800" height="6" fill="#39ff33"/>
+  <g font-family="DejaVu Sans Mono, monospace">
+    <text x="48" y="86" font-size="24" letter-spacing="7" fill="#39ff33">◆ PRE-SEEDED ROSTER</text>
+    <text x="48" y="150" font-family="DejaVu Sans, sans-serif" font-weight="bold" font-size="54" fill="#f0f0f2">19 AGENTS, ONE LEDGER</text>
+    <g font-size="24" fill="#f0f0f2">
+      <g transform="translate(48 200)"><rect width="150" height="56" fill="#16151f" stroke="#32303e" stroke-width="2"/><path d="M0 0h4v56H0z" fill="#00e5ff"/><text x="20" y="36">claude</text></g>
+      <g transform="translate(212 200)"><rect width="150" height="56" fill="#16151f" stroke="#32303e" stroke-width="2"/><path d="M0 0h4v56H0z" fill="#39ff33"/><text x="20" y="36">codex</text></g>
+      <g transform="translate(376 200)"><rect width="150" height="56" fill="#16151f" stroke="#32303e" stroke-width="2"/><path d="M0 0h4v56H0z" fill="#ff147f"/><text x="20" y="36">gemini</text></g>
+      <g transform="translate(540 200)"><rect width="212" height="56" fill="#16151f" stroke="#32303e" stroke-width="2"/><path d="M0 0h4v56H0z" fill="#00e5ff"/><text x="20" y="36">cursor-agent</text></g>
+      <g transform="translate(48 272)"><rect width="150" height="56" fill="#16151f" stroke="#32303e" stroke-width="2"/><path d="M0 0h4v56H0z" fill="#39ff33"/><text x="20" y="36">copilot</text></g>
+      <g transform="translate(212 272)"><rect width="150" height="56" fill="#16151f" stroke="#32303e" stroke-width="2"/><path d="M0 0h4v56H0z" fill="#ff147f"/><text x="20" y="36">opencode</text></g>
+      <g transform="translate(376 272)"><rect width="150" height="56" fill="#16151f" stroke="#32303e" stroke-width="2"/><path d="M0 0h4v56H0z" fill="#00e5ff"/><text x="20" y="36">grok</text></g>
+      <g transform="translate(540 272)"><rect width="212" height="56" fill="#16151f" stroke="#32303e" stroke-width="2"/><path d="M0 0h4v56H0z" fill="#39ff33"/><text x="20" y="36">antigravity-cli</text></g>
+      <g transform="translate(48 344)"><rect width="150" height="56" fill="#16151f" stroke="#32303e" stroke-width="2"/><path d="M0 0h4v56H0z" fill="#ff147f"/><text x="20" y="36">kimi</text></g>
+      <g transform="translate(212 344)"><rect width="150" height="56" fill="#16151f" stroke="#32303e" stroke-width="2"/><path d="M0 0h4v56H0z" fill="#00e5ff"/><text x="20" y="36">devin</text></g>
+      <g transform="translate(376 344)"><rect width="150" height="56" fill="#16151f" stroke="#32303e" stroke-width="2"/><path d="M0 0h4v56H0z" fill="#39ff33"/><text x="20" y="36">kilocode</text></g>
+      <g transform="translate(540 344)"><rect width="212" height="56" fill="#16151f" stroke="#ff147f" stroke-width="2"/><path d="M0 0h4v56H0z" fill="#ff147f"/><text x="20" y="36" fill="#ff147f">+ 8 more</text></g>
+    </g>
+    <text x="48" y="462" font-size="20" letter-spacing="5" fill="#807f8b">INSERT OR IGNORE · EVERY COMMAND REPORTS</text>
+  </g>
+</svg>

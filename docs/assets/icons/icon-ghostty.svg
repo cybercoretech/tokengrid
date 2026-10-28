@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Ghostty profile">
+  <path d="M32 8c-11 0-19 8-19 19v27l6-5 6 5 7-5 7 5 6-5 6 5V27c0-11-8-19-19-19z" fill="#16151f" stroke="#00e5ff" stroke-width="3" stroke-linejoin="round"/>
+  <circle cx="25" cy="28" r="4" fill="#39ff33"/>
+  <circle cx="39" cy="28" r="4" fill="#39ff33"/>
+  <path d="M24 40l5 5 11-11" fill="none" stroke="#ff147f" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

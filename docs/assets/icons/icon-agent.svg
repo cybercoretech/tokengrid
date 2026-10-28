@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="AI agent">
+  <path d="M32 6v8" stroke="#00e5ff" stroke-width="3"/>
+  <circle cx="32" cy="5" r="3.5" fill="#39ff33"/>
+  <rect x="12" y="14" width="40" height="34" rx="6" fill="#16151f" stroke="#00e5ff" stroke-width="3"/>
+  <rect x="20" y="24" width="9" height="9" fill="#39ff33"/>
+  <rect x="35" y="24" width="9" height="9" fill="#ff147f"/>
+  <path d="M22 40h20" stroke="#32303e" stroke-width="3" stroke-linecap="round"/>
+  <path d="M6 26v10M58 26v10" stroke="#8a22e2" stroke-width="3" stroke-linecap="round"/>
+</svg>

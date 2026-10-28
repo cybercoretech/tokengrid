@@ -1,0 +1,418 @@
+{
+  "name": "tokengrid-asset-pack",
+  "schema": 1,
+  "description": "Original icons, SVG sources, PNG renders, hero card, feature cards and social card for the TokenGrid GitHub Pages site.",
+  "project": "TokenGrid",
+  "repo": "https://github.com/cybercoretech/tokengrid",
+  "site": "https://cybercoretech.github.io/tokengrid/",
+  "license": "MIT",
+  "author": "Cybercore Tech",
+  "generated": "2026-10-27",
+  "counts": {
+    "total": 50,
+    "svg": 25,
+    "png": 25
+  },
+  "files": [
+    {
+      "path": "cards/card-agents.png",
+      "category": "cards",
+      "format": "png",
+      "bytes": 45645,
+      "purpose": "800x500 feature card \u2014 19-agent roster",
+      "width": 800,
+      "height": 500
+    },
+    {
+      "path": "cards/card-agents.svg",
+      "category": "cards",
+      "format": "svg",
+      "bytes": 3343,
+      "purpose": "800x500 feature card \u2014 19-agent roster"
+    },
+    {
+      "path": "cards/card-bar.png",
+      "category": "cards",
+      "format": "png",
+      "bytes": 41264,
+      "purpose": "800x500 feature card \u2014 bar widget readout",
+      "width": 800,
+      "height": 500
+    },
+    {
+      "path": "cards/card-bar.svg",
+      "category": "cards",
+      "format": "svg",
+      "bytes": 1850,
+      "purpose": "800x500 feature card \u2014 bar widget readout"
+    },
+    {
+      "path": "cards/card-budget.png",
+      "category": "cards",
+      "format": "png",
+      "bytes": 42854,
+      "purpose": "800x500 feature card \u2014 budget caps",
+      "width": 800,
+      "height": 500
+    },
+    {
+      "path": "cards/card-budget.svg",
+      "category": "cards",
+      "format": "svg",
+      "bytes": 2526,
+      "purpose": "800x500 feature card \u2014 budget caps"
+    },
+    {
+      "path": "cards/card-telemetry.png",
+      "category": "cards",
+      "format": "png",
+      "bytes": 26052,
+      "purpose": "800x500 feature card \u2014 telemetry pipeline",
+      "width": 800,
+      "height": 500
+    },
+    {
+      "path": "cards/card-telemetry.svg",
+      "category": "cards",
+      "format": "svg",
+      "bytes": 2493,
+      "purpose": "800x500 feature card \u2014 telemetry pipeline"
+    },
+    {
+      "path": "cards/tokengrid-hero-card.png",
+      "category": "cards",
+      "format": "png",
+      "bytes": 171804,
+      "purpose": "1200x630 hero card \u2014 wordmark, ledger preview, chips",
+      "width": 1200,
+      "height": 630
+    },
+    {
+      "path": "cards/tokengrid-hero-card.svg",
+      "category": "cards",
+      "format": "svg",
+      "bytes": 6412,
+      "purpose": "1200x630 hero card \u2014 wordmark, ledger preview, chips"
+    },
+    {
+      "path": "icons/icon-agent.svg",
+      "category": "icons",
+      "format": "svg",
+      "bytes": 623,
+      "purpose": "CLI AI agent head"
+    },
+    {
+      "path": "icons/icon-bar.svg",
+      "category": "icons",
+      "format": "svg",
+      "bytes": 448,
+      "purpose": "Omarchy bar widget with live readout"
+    },
+    {
+      "path": "icons/icon-bolt.svg",
+      "category": "icons",
+      "format": "svg",
+      "bytes": 393,
+      "purpose": "live telemetry / lightning summary"
+    },
+    {
+      "path": "icons/icon-budget.svg",
+      "category": "icons",
+      "format": "svg",
+      "bytes": 582,
+      "purpose": "per-agent budget cap gauge"
+    },
+    {
+      "path": "icons/icon-clock.svg",
+      "category": "icons",
+      "format": "svg",
+      "bytes": 466,
+      "purpose": "wrapper duration measurement"
+    },
+    {
+      "path": "icons/icon-download.svg",
+      "category": "icons",
+      "format": "svg",
+      "bytes": 552,
+      "purpose": "asset pack download glyph"
+    },
+    {
+      "path": "icons/icon-ghostty.svg",
+      "category": "icons",
+      "format": "svg",
+      "bytes": 512,
+      "purpose": "Ghostty isolation profile"
+    },
+    {
+      "path": "icons/icon-grid.svg",
+      "category": "icons",
+      "format": "svg",
+      "bytes": 408,
+      "purpose": "2x2 token grid \u2014 plugin identity glyph"
+    },
+    {
+      "path": "icons/icon-ledger.svg",
+      "category": "icons",
+      "format": "svg",
+      "bytes": 507,
+      "purpose": "SQLite ledger (token_usage + agents)"
+    },
+    {
+      "path": "icons/icon-palette.svg",
+      "category": "icons",
+      "format": "svg",
+      "bytes": 522,
+      "purpose": "312-theme chooser palette"
+    },
+    {
+      "path": "icons/icon-pipeline.svg",
+      "category": "icons",
+      "format": "svg",
+      "bytes": 772,
+      "purpose": "alias -> wrapper -> daemon -> ledger"
+    },
+    {
+      "path": "icons/icon-rule.svg",
+      "category": "icons",
+      "format": "svg",
+      "bytes": 478,
+      "purpose": "Hyprland Lua window rule braces"
+    },
+    {
+      "path": "icons/icon-shield.svg",
+      "category": "icons",
+      "format": "svg",
+      "bytes": 485,
+      "purpose": "local-only data (nothing leaves the host)"
+    },
+    {
+      "path": "icons/icon-terminal.svg",
+      "category": "icons",
+      "format": "svg",
+      "bytes": 643,
+      "purpose": "Rust TUI terminal window"
+    },
+    {
+      "path": "icons/icon-token.svg",
+      "category": "icons",
+      "format": "svg",
+      "bytes": 374,
+      "purpose": "a single counted token"
+    },
+    {
+      "path": "icons/icon-window.svg",
+      "category": "icons",
+      "format": "svg",
+      "bytes": 722,
+      "purpose": "1100x650 floating window rule"
+    },
+    {
+      "path": "img/favicon.svg",
+      "category": "img",
+      "format": "svg",
+      "bytes": 509,
+      "purpose": "site favicon source (64px grid)"
+    },
+    {
+      "path": "img/social-card.png",
+      "category": "img",
+      "format": "png",
+      "bytes": 165679,
+      "purpose": "1200x630 Open Graph / social card",
+      "width": 1200,
+      "height": 630
+    },
+    {
+      "path": "img/social-card.svg",
+      "category": "img",
+      "format": "svg",
+      "bytes": 3010,
+      "purpose": "1200x630 Open Graph / social card"
+    },
+    {
+      "path": "png/favicon-512.png",
+      "category": "png",
+      "format": "png",
+      "bytes": 4251,
+      "purpose": "favicon rendered at 512px",
+      "width": 512,
+      "height": 512
+    },
+    {
+      "path": "png/icon-agent.png",
+      "category": "png",
+      "format": "png",
+      "bytes": 8699,
+      "purpose": "CLI AI agent head",
+      "width": 512,
+      "height": 512
+    },
+    {
+      "path": "png/icon-bar.png",
+      "category": "png",
+      "format": "png",
+      "bytes": 6995,
+      "purpose": "Omarchy bar widget with live readout",
+      "width": 512,
+      "height": 512
+    },
+    {
+      "path": "png/icon-bolt.png",
+      "category": "png",
+      "format": "png",
+      "bytes": 14746,
+      "purpose": "live telemetry / lightning summary",
+      "width": 512,
+      "height": 512
+    },
+    {
+      "path": "png/icon-budget.png",
+      "category": "png",
+      "format": "png",
+      "bytes": 16661,
+      "purpose": "per-agent budget cap gauge",
+      "width": 512,
+      "height": 512
+    },
+    {
+      "path": "png/icon-clock.png",
+      "category": "png",
+      "format": "png",
+      "bytes": 17974,
+      "purpose": "wrapper duration measurement",
+      "width": 512,
+      "height": 512
+    },
+    {
+      "path": "png/icon-download.png",
+      "category": "png",
+      "format": "png",
+      "bytes": 6781,
+      "purpose": "asset pack download glyph",
+      "width": 512,
+      "height": 512
+    },
+    {
+      "path": "png/icon-ghostty.png",
+      "category": "png",
+      "format": "png",
+      "bytes": 14165,
+      "purpose": "Ghostty isolation profile",
+      "width": 512,
+      "height": 512
+    },
+    {
+      "path": "png/icon-grid.png",
+      "category": "png",
+      "format": "png",
+      "bytes": 2016,
+      "purpose": "2x2 token grid \u2014 plugin identity glyph",
+      "width": 512,
+      "height": 512
+    },
+    {
+      "path": "png/icon-ledger.png",
+      "category": "png",
+      "format": "png",
+      "bytes": 12403,
+      "purpose": "SQLite ledger (token_usage + agents)",
+      "width": 512,
+      "height": 512
+    },
+    {
+      "path": "png/icon-palette.png",
+      "category": "png",
+      "format": "png",
+      "bytes": 24953,
+      "purpose": "312-theme chooser palette",
+      "width": 512,
+      "height": 512
+    },
+    {
+      "path": "png/icon-pipeline.png",
+      "category": "png",
+      "format": "png",
+      "bytes": 10910,
+      "purpose": "alias -> wrapper -> daemon -> ledger",
+      "width": 512,
+      "height": 512
+    },
+    {
+      "path": "png/icon-rule.png",
+      "category": "png",
+      "format": "png",
+      "bytes": 12390,
+      "purpose": "Hyprland Lua window rule braces",
+      "width": 512,
+      "height": 512
+    },
+    {
+      "path": "png/icon-shield.png",
+      "category": "png",
+      "format": "png",
+      "bytes": 15307,
+      "purpose": "local-only data (nothing leaves the host)",
+      "width": 512,
+      "height": 512
+    },
+    {
+      "path": "png/icon-terminal.png",
+      "category": "png",
+      "format": "png",
+      "bytes": 11187,
+      "purpose": "Rust TUI terminal window",
+      "width": 512,
+      "height": 512
+    },
+    {
+      "path": "png/icon-token.png",
+      "category": "png",
+      "format": "png",
+      "bytes": 25423,
+      "purpose": "a single counted token",
+      "width": 512,
+      "height": 512
+    },
+    {
+      "path": "png/icon-window.png",
+      "category": "png",
+      "format": "png",
+      "bytes": 9231,
+      "purpose": "1100x650 floating window rule",
+      "width": 512,
+      "height": 512
+    },
+    {
+      "path": "png/logo-mark.png",
+      "category": "png",
+      "format": "png",
+      "bytes": 33233,
+      "purpose": "hex token-grid emblem, 512px",
+      "width": 512,
+      "height": 512
+    },
+    {
+      "path": "png/logo-wordmark.png",
+      "category": "png",
+      "format": "png",
+      "bytes": 12280,
+      "purpose": "stacked TOKEN/GRID wordmark with meter bar",
+      "width": 720,
+      "height": 240
+    },
+    {
+      "path": "svg/logo-mark.svg",
+      "category": "svg",
+      "format": "svg",
+      "bytes": 1185,
+      "purpose": "hex token-grid emblem, 512px"
+    },
+    {
+      "path": "svg/logo-wordmark.svg",
+      "category": "svg",
+      "format": "svg",
+      "bytes": 1157,
+      "purpose": "stacked TOKEN/GRID wordmark with meter bar"
+    }
+  ]
+}

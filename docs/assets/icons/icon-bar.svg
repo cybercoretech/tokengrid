@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Omarchy bar widget">
+  <rect x="6" y="22" width="52" height="20" rx="4" fill="#16151f" stroke="#32303e" stroke-width="2"/>
+  <path d="M14 32h10M28 32h8" stroke="#807f8b" stroke-width="3" stroke-linecap="round"/>
+  <rect x="42" y="26" width="12" height="12" fill="#00e5ff"/>
+  <path d="M48 12l-4 8h4l-2 8 7-11h-4l3-5z" fill="#39ff33"/>
+</svg>

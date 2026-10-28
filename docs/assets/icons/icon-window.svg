@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Floating window rule">
+  <rect x="8" y="16" width="48" height="32" rx="3" fill="#16151f" stroke="#8a22e2" stroke-width="3"/>
+  <path d="M8 26h48" stroke="#32303e" stroke-width="3"/>
+  <path d="M14 21h6" stroke="#ff147f" stroke-width="3" stroke-linecap="round"/>
+  <path d="M2 8h60M2 8l5-4M62 8l-5-4" stroke="#39ff33" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path d="M2 56h60M2 56l5 4M62 56l-5 4" stroke="#39ff33" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path d="M34 32l6 6-6 6" fill="none" stroke="#00e5ff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

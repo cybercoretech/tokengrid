@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Asset pack download">
+  <path d="M10 40v12a4 4 0 0 0 4 4h36a4 4 0 0 0 4-4V40" fill="#16151f" stroke="#32303e" stroke-width="3" stroke-linecap="round"/>
+  <path d="M32 8v28" stroke="#00e5ff" stroke-width="5" stroke-linecap="round"/>
+  <path d="M20 26l12 12 12-12" fill="none" stroke="#39ff33" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M14 54h36" stroke="#ff147f" stroke-width="3" stroke-linecap="round"/>
+</svg>

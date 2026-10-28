@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630" role="img" aria-label="TokenGrid hero card">
+  <defs>
+    <linearGradient id="h-edge" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#00e5ff"/><stop offset="1" stop-color="#ff147f"/>
+    </linearGradient>
+    <linearGradient id="h-em" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#00e5ff"/><stop offset="1" stop-color="#39ff33"/>
+    </linearGradient>
+    <pattern id="h-grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0v40" fill="none" stroke="#32303e" stroke-width="1" opacity=".55"/>
+    </pattern>
+    <radialGradient id="h-glow" cx=".78" cy=".18" r=".8">
+      <stop offset="0" stop-color="#8a22e2" stop-opacity=".35"/><stop offset="1" stop-color="#8a22e2" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="h-glow2" cx=".1" cy=".95" r=".7">
+      <stop offset="0" stop-color="#00e5ff" stop-opacity=".22"/><stop offset="1" stop-color="#00e5ff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="630" fill="#09080f"/>
+  <rect width="1200" height="630" fill="url(#h-grid)"/>
+  <rect width="1200" height="630" fill="url(#h-glow)"/>
+  <rect width="1200" height="630" fill="url(#h-glow2)"/>
+  <rect x="0" y="0" width="1200" height="6" fill="url(#h-edge)"/>
+  <g transform="translate(64 56)">
+    <g font-family="DejaVu Sans, sans-serif" font-weight="bold">
+      <text x="0" y="96" font-size="96" letter-spacing="4" fill="url(#h-em)">TOKEN</text>
+      <text x="0" y="192" font-size="96" letter-spacing="20" fill="#f0f0f2">GRID</text>
+    </g>
+    <text x="4" y="240" font-family="DejaVu Sans Mono, monospace" font-size="26" letter-spacing="6" fill="#807f8b">AI TOKEN TELEMETRY · OMARCHY BAR</text>
+    <g font-family="DejaVu Sans Mono, monospace" font-size="22" fill="#f0f0f2">
+      <g transform="translate(0 284)">
+        <rect x="0" y="0" width="176" height="52" fill="#16151f" stroke="#32303e" stroke-width="2"/>
+        <text x="20" y="33" fill="#39ff33">◆ 19 AGENTS</text>
+      </g>
+      <g transform="translate(192 284)">
+        <rect x="0" y="0" width="216" height="52" fill="#16151f" stroke="#32303e" stroke-width="2"/>
+        <text x="20" y="33" fill="#00e5ff">◆ SQLITE LEDGER</text>
+      </g>
+      <g transform="translate(424 284)">
+        <rect x="0" y="0" width="228" height="52" fill="#16151f" stroke="#32303e" stroke-width="2"/>
+        <text x="20" y="33" fill="#ff147f">◆ BUDGET CAPS</text>
+      </g>
+    </g>
+    <text x="4" y="500" font-family="DejaVu Sans Mono, monospace" font-size="24" letter-spacing="4" fill="#00e5ff">cybercoretech.github.io/tokengrid</text>
+    <text x="4" y="536" font-family="DejaVu Sans Mono, monospace" font-size="20" letter-spacing="4" fill="#807f8b">CYBERCORE TECH / OMARCHY INTEGRATIONS / MIT</text>
+  </g>
+  <g transform="translate(744 132)">
+    <rect width="392" height="368" fill="#16151f" stroke="#32303e" stroke-width="3"/>
+    <rect width="392" height="48" fill="#09080f"/>
+    <circle cx="24" cy="24" r="7" fill="#ff147f"/><circle cx="48" cy="24" r="7" fill="#ff9000"/><circle cx="72" cy="24" r="7" fill="#39ff33"/>
+    <text x="112" y="31" font-family="DejaVu Sans Mono, monospace" font-size="19" letter-spacing="3" fill="#807f8b">tokengrid — today</text>
+    <g font-family="DejaVu Sans Mono, monospace" font-size="20">
+      <g transform="translate(24 76)">
+        <rect width="104" height="78" fill="#09080f" stroke="#32303e" stroke-width="2"/>
+        <rect width="4" height="78" fill="#00e5ff"/>
+        <text x="18" y="34" fill="#f0f0f2">claude</text><text x="18" y="60" fill="#00e5ff" font-size="17">182.4k tok</text>
+      </g>
+      <g transform="translate(144 76)">
+        <rect width="104" height="78" fill="#09080f" stroke="#32303e" stroke-width="2"/>
+        <rect width="4" height="78" fill="#39ff33"/>
+        <text x="18" y="34" fill="#f0f0f2">codex</text><text x="18" y="60" fill="#39ff33" font-size="17">96.1k tok</text>
+      </g>
+      <g transform="translate(264 76)">
+        <rect width="104" height="78" fill="#09080f" stroke="#32303e" stroke-width="2"/>
+        <rect width="4" height="78" fill="#00e5ff"/>
+        <text x="18" y="34" fill="#f0f0f2">gemini</text><text x="18" y="60" fill="#00e5ff" font-size="17">74.5k tok</text>
+      </g>
+      <g transform="translate(24 170)">
+        <rect width="104" height="78" fill="#09080f" stroke="#32303e" stroke-width="2"/>
+        <rect width="4" height="78" fill="#00e5ff"/>
+        <text x="18" y="34" fill="#f0f0f2">copilot</text><text x="18" y="60" fill="#00e5ff" font-size="17">41.2k tok</text>
+      </g>
+      <g transform="translate(144 170)">
+        <rect width="104" height="78" fill="#09080f" stroke="#ff147f" stroke-width="2"/>
+        <rect width="4" height="78" fill="#ff147f"/>
+        <text x="18" y="34" fill="#f0f0f2">kimi</text><text x="18" y="60" fill="#ff147f" font-size="17">OVER CAP</text>
+      </g>
+      <g transform="translate(264 170)">
+        <rect width="104" height="78" fill="#09080f" stroke="#32303e" stroke-width="2"/>
+        <rect width="4" height="78" fill="#39ff33"/>
+        <text x="18" y="34" fill="#f0f0f2">opencode</text><text x="18" y="60" fill="#39ff33" font-size="17">33.8k tok</text>
+      </g>
+      <g transform="translate(24 264)">
+        <rect width="104" height="78" fill="#09080f" stroke="#32303e" stroke-width="2"/>
+        <rect width="4" height="78" fill="#00e5ff"/>
+        <text x="18" y="34" fill="#f0f0f2">grok</text><text x="18" y="60" fill="#00e5ff" font-size="17">12.9k tok</text>
+      </g>
+      <g transform="translate(144 264)">
+        <rect width="104" height="78" fill="#09080f" stroke="#32303e" stroke-width="2"/>
+        <rect width="4" height="78" fill="#39ff33"/>
+        <text x="18" y="34" fill="#f0f0f2">qwen</text><text x="18" y="60" fill="#39ff33" font-size="17">9.4k tok</text>
+      </g>
+      <g transform="translate(264 264)">
+        <rect width="104" height="78" fill="#09080f" stroke="#32303e" stroke-width="2"/>
+        <rect width="4" height="78" fill="#ff9000"/>
+        <text x="18" y="34" fill="#f0f0f2">crush</text><text x="18" y="60" fill="#ff9000" font-size="17">7.1k tok</text>
+      </g>
+    </g>
+    <text x="24" y="352" font-family="DejaVu Sans Mono, monospace" font-size="19" letter-spacing="3" fill="#807f8b">⚡ 412,650 tok · $1.2841</text>
+  </g>
+</svg>

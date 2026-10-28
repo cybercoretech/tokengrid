@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500" role="img" aria-label="TokenGrid budget caps card">
+  <defs>
+    <pattern id="p2g" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0H0v32" fill="none" stroke="#32303e" stroke-width="1" opacity=".5"/></pattern>
+  </defs>
+  <rect width="800" height="500" fill="#09080f"/>
+  <rect width="800" height="500" fill="url(#p2g)"/>
+  <rect width="800" height="6" fill="#ff147f"/>
+  <g font-family="DejaVu Sans Mono, monospace">
+    <text x="48" y="86" font-size="24" letter-spacing="7" fill="#ff147f">◆ PER-AGENT BUDGET_LIMIT</text>
+    <text x="48" y="150" font-family="DejaVu Sans, sans-serif" font-weight="bold" font-size="54" fill="#f0f0f2">CAPS THAT HOLD</text>
+    <g transform="translate(70 200)">
+      <path d="M20 190a130 130 0 0 1 260 0" fill="none" stroke="#32303e" stroke-width="30" stroke-linecap="round"/>
+      <path d="M20 190a130 130 0 0 1 156-127" fill="none" stroke="#39ff33" stroke-width="30" stroke-linecap="round"/>
+      <path d="M186 63a130 130 0 0 1 76 103" fill="none" stroke="#ff147f" stroke-width="30" stroke-linecap="round"/>
+      <path d="M150 190 236 96" stroke="#f0f0f2" stroke-width="12" stroke-linecap="round"/>
+      <circle cx="150" cy="190" r="24" fill="#16151f" stroke="#f0f0f2" stroke-width="8"/>
+      <text x="76" y="252" font-size="34" fill="#ff147f">$10.00 DEFAULT CAP</text>
+    </g>
+    <g transform="translate(430 206)" font-size="26">
+      <g><rect width="322" height="58" fill="#16151f" stroke="#32303e" stroke-width="2"/><rect x="14" y="24" width="230" height="10" fill="#32303e"/><rect x="14" y="24" width="142" height="10" fill="#00e5ff"/><text x="14" y="19" font-size="19" fill="#f0f0f2">claude</text></g>
+      <g transform="translate(0 74)"><rect width="322" height="58" fill="#16151f" stroke="#32303e" stroke-width="2"/><rect x="14" y="24" width="230" height="10" fill="#32303e"/><rect x="14" y="24" width="88" height="10" fill="#39ff33"/><text x="14" y="19" font-size="19" fill="#f0f0f2">codex</text></g>
+      <g transform="translate(0 148)"><rect width="322" height="58" fill="#09080f" stroke="#ff147f" stroke-width="3"/><rect x="14" y="24" width="230" height="10" fill="#32303e"/><rect x="14" y="24" width="221" height="10" fill="#ff147f"/><text x="14" y="19" font-size="19" fill="#ff147f">kimi — OVER CAP</text></g>
+    </g>
+    <text x="48" y="462" font-size="20" letter-spacing="5" fill="#807f8b">EDIT THE CAP IN SQLITE · THE BAR TURNS RED</text>
+  </g>
+</svg>

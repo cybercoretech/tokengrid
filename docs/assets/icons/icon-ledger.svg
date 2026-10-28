@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="SQLite ledger">
+  <ellipse cx="32" cy="14" rx="20" ry="7" fill="#16151f" stroke="#00e5ff" stroke-width="3"/>
+  <path d="M12 14v16c0 4 9 7 20 7s20-3 20-7V14" fill="#16151f" stroke="#00e5ff" stroke-width="3"/>
+  <path d="M12 30v16c0 4 9 7 20 7s20-3 20-7V30" fill="none" stroke="#00e5ff" stroke-width="3"/>
+  <path d="M22 22h20M22 38h20" stroke="#39ff33" stroke-width="3" stroke-linecap="round"/>
+</svg>
