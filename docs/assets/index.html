@@ -17,6 +17,19 @@
     .preview { display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; margin: 1.6rem 0 2rem; }
     .preview img { max-height: 5.5rem; background: color-mix(in srgb, var(--bg) 70%, #000); border: 1px solid var(--line); padding: .6rem; }
     .dl { margin-top: 2rem; padding: 1rem 1.2rem; border: 1px dashed var(--line); font: .74rem/1.6 var(--mono); letter-spacing: .1em; color: var(--muted); }
+    /* Phones and tablets: each file is a stacked card instead of a 4-column row. */
+    @media (max-width: 640px) {
+      .file-table thead { display: none; }
+      .file-table, .file-table tbody { display: block; }
+      .file-table tr { display: grid; grid-template-columns: 1fr auto; gap: .2rem .8rem; padding: .7rem 0; border-bottom: 1px dashed color-mix(in srgb, var(--line) 70%, transparent); }
+      .file-table td { padding: 0; border: 0; min-width: 0; }
+      .file-table td:first-child, .file-table td:last-child { grid-column: 1 / -1; }
+      .file-table td:first-child a { overflow-wrap: anywhere; }
+    }
+    @media (max-width: 1024px) { .file-table th { font-size: 11px; } }
+    /* The shared stylesheet hides the nav under 960px; here it is the only way around. */
+    @media (max-width: 960px) { .site-header .main-nav { display: flex; gap: 1rem; } .site-header .main-nav a { display: inline-flex; align-items: center; min-height: 24px; } }
+    @media (pointer: coarse) { .file-table a, .dl a, footer a { display: inline-flex; align-items: center; min-height: 24px; } }
   </style>
 </head>
 <body>
